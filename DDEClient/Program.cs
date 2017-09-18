@@ -5,12 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
-using DdeNet.Client;
+using NDde.Client;
 
 namespace DDEClient
 {
     class Program
     {
+        static float T1;
+        static float T2;
         static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
@@ -28,7 +30,7 @@ namespace DDEClient
                     Console.ReadLine();
 
                 }
-                catch (DdeNet.DdeException e)
+                catch (NDde.DdeException e)
                 {
                     Console.WriteLine(e.Message);
                 }
