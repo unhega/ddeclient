@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,9 +14,9 @@ namespace DDEClient
         static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
-
-            Console.WriteLine(Thread.CurrentThread.ManagedThreadId); 
-                using (DdeClient client = new DdeClient("CoDeSys", @"D:\Project\discreteOut.pro"))
+            FileStream fs = File.Create(DateTime.Now.ToLongTimeString().ToString() + ".csv");
+            TextWriter writer = new StreamWriter(fs);
+            using (DdeClient client = new DdeClient("CoDeSys", @"D:\Project\discreteOut.pro"))
                 try
                 {
                     client.Disconnected += Client_Disconnected;
@@ -24,8 +25,8 @@ namespace DDEClient
                     client.Advise += OnAdvise;
                     client.StartAdvise("T1", 1, true, 600);
                     client.StartAdvise("T2", 1, true, 600);
-                    
-                    
+                    Console.ReadLine();
+
                 }
                 catch (DdeNet.DdeException e)
                 {
@@ -53,6 +54,7 @@ namespace DDEClient
 
         static void OnAdvise(object sender,DdeAdviseEventArgs e)
         {
+            Console.Clear();
             Console.WriteLine(e.Text);
         }
 
