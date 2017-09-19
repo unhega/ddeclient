@@ -13,11 +13,17 @@ namespace DDEClient
     {
         static float T1;
         static float T2;
+        static TextWriter writer;
         static void Main(string[] args)
         {
+            
+
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
-            FileStream fs = File.Create(DateTime.Now.ToLongTimeString().ToString() + ".csv");
-            TextWriter writer = new StreamWriter(fs);
+            FileStream fs = File.Create(DateTime.Now.ToString("HH_mm_ss") + ".csv");
+            writer = new StreamWriter(fs);
+            writer.WriteLine("\"TIME\";\"T1\";\"T2\"");
+            TimerCallback timerCallback = new TimerCallback(onTick);
+            Timer timer = new Timer(timerCallback, null, 0, 2000);
             using (DdeClient client = new DdeClient("CoDeSys", @"D:\Project\discreteOut.pro"))
                 try
                 {
@@ -36,7 +42,11 @@ namespace DDEClient
                 }
                 finally
                 {
+                    timer.Dispose();
                     if (client.IsConnected == true) client.Disconnect();
+                    writer.Close();
+                    fs.Close();
+                    
                 }
 
             /*}
@@ -44,7 +54,7 @@ namespace DDEClient
             {
                 Console.WriteLine(e.Message);
             }*/
-            Console.ReadLine();
+            
             
         }
 
@@ -56,13 +66,22 @@ namespace DDEClient
 
         static void OnAdvise(object sender,DdeAdviseEventArgs e)
         {
-            Console.Clear();
-            Console.WriteLine(e.Text);
+            if (e.Item == "T1") T1 = float.Parse(e.Text);
+            if (e.Item == "T2") T2 = float.Parse(e.Text);
         }
 
         static void CurrentDomain_ProcessExit(object sender, EventArgs r)
         {
             Console.WriteLine("Exit");
+        }
+
+        static void onTick(object obj)
+        {
+            string str = $"\"{DateTime.Now.ToLongTimeString()}\";\"{T1}\";\"{T2}\"";
+
+            Console.WriteLine(str);
+            writer.WriteLine(str);
+            
         }
     }
 }
